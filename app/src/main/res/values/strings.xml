@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Softix Technologies</string>
+    <string name="title_activity_login">Sign in</string>
+    <!-- Strings related to login -->
+    <string name="etext_name_string">Name</string>
+    <string name="etext_password_string">Password</string>
+    <string name="login_button">Log In</string>
+    <string name="title_activity_accounts">Accounts</string>
+    <string name="title_activity_groups">Groups</string>
+    <string name="title_activity_users">Users</string>
+
+    <string name="toolbar_title">Softix Technologies</string>
+</resources>
