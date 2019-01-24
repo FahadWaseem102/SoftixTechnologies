@@ -35,10 +35,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        String groupsTabledb = "CREATE TABLE " + TABLE1_NAME + " (group_id INTEGER PRIMARY KEY AUTOINCREMENT, group_title VARCHAR(30))" ;
-        String accountsTabledb = "CREATE TABLE " + TABLE_NAME + " (" + TABLE_COL1 + " INTEGER PRIMARY KEY AUTOINCREMENT, " + TABLE_COL2 + " VARCHAR(50), " +
+        String groupsTabledb = "CREATE TABLE " + TABLE1_NAME + " " +
+                "(group_id INTEGER PRIMARY KEY AUTOINCREMENT, group_title VARCHAR(30))" ;
+        String accountsTabledb = "CREATE TABLE " + TABLE_NAME + " " +
+                "(" + TABLE_COL1 + " INTEGER PRIMARY KEY AUTOINCREMENT, " + TABLE_COL2 + " VARCHAR(50), " +
                 TABLE_COL3 + " INTEGER, " + TABLE_COL4 + " VARCHAR(50))" ;
-        String usersTabledb = "CREATE TABLE " + TABLE2_NAME + " (user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)" ;
+        String usersTabledb = "CREATE TABLE " + TABLE2_NAME + " " +
+                "(user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)" ;
 
         try {
             db.execSQL(groupsTabledb);
@@ -81,7 +84,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     public boolean checkUsernamePassword(String username,String password){
         SQLiteDatabase db = this.getReadableDatabase() ;
-        Cursor cursor = db.rawQuery("Select * from " + TABLE2_NAME + " where username=? and password=?", new String[]{username,password}) ;
+        Cursor cursor = db.rawQuery("Select * from " + TABLE2_NAME +
+                " where username=? and password=?", new String[]{username,password}) ;
         if (cursor.getCount()>0){return true;}else {return false;}
     }
 
@@ -93,7 +97,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion == 2) {
             db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + TABLE_COL4 + " VARCHAR(60)");
         }else{
-            Toast.makeText(context, "Data no upgraded", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Data not upgraded", Toast.LENGTH_SHORT).show();
         }
         db.execSQL(groupsTabledb);
         db.execSQL(accountsTabledb);
@@ -107,12 +111,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor datas = database.rawQuery(query, null) ;
         return datas ;
     }
+
     public void deleteRow(ModelAccounts nameAcc){
         SQLiteDatabase database = this.getWritableDatabase() ;
-        database.delete(TABLE_NAME, TABLE_COL2 + "= ?", new String[]{String.valueOf(nameAcc.getAccName())});
-
+        database.delete(TABLE_NAME, TABLE_COL2 + "= ?",
+                new String[]{String.valueOf(nameAcc.getAccName())});
         database.close();
+    }
 
+    public boolean updateRow(String accountName, String opBlnc){
+        SQLiteDatabase database = this.getWritableDatabase() ;
+        ContentValues contentValues = new ContentValues() ;
+        contentValues.put(TABLE_COL2, accountName);
+        contentValues.put(TABLE_COL4, opBlnc);
+        database.update(TABLE_NAME, contentValues, "acc_id = ?", new String[]{accountName}) ;
+        return true ;
     }
 }
 

@@ -40,10 +40,10 @@ public class AccountsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         listView = findViewById(R.id.list_view_groups) ;
         mdatabaseHelper = new DatabaseHelper(this) ;
-
         try{
-        showAccounts();}catch (Exception ex){
-            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+            populateListView();
+        }catch (Exception e){
+            Toast.makeText(this, ""+ e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -133,20 +133,6 @@ public class AccountsActivity extends AppCompatActivity {
         }
     }
 
-    public void showAccounts(){
-            Cursor cursor = mdatabaseHelper.getData();
-            if (cursor.getCount() == 0) {
-                Toast.makeText(this, "Create new Accounts", Toast.LENGTH_SHORT).show();
-            }else {
-                while (cursor.moveToNext()) {
-                    mModelAccountsarray.add(new ModelAccounts(cursor.getString(1), cursor.getString(3)));
-                }
-                customAdapter = new AccountsAdapter(AccountsActivity.this, mModelAccountsarray);
-                listView.setAdapter(customAdapter);
-
-            }
-    }
-
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
@@ -179,9 +165,79 @@ public class AccountsActivity extends AppCompatActivity {
                 alertDialog.show();
                 break;
             case R.id.edit_item :
-                Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this) ;
+                dialog.setTitle("Edit Account") ;
+                dialog.setMessage("Enter new name and Balance info :") ;
+                final EditText nameEdit = new EditText(AccountsActivity.this);
+                final EditText blncEdit = new EditText(AccountsActivity.this);
+                nameEdit.setHint("Account Name");
+                nameEdit.setHintTextColor(getResources().getColor(R.color.colorHintText));
+                blncEdit.setHint("Opening Balance");
+                blncEdit.setHintTextColor(getResources().getColor(R.color.colorHintText));
+
+                LinearLayout layout = new LinearLayout(AccountsActivity.this);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT) ;
+                LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT) ;
+                lp1.setMargins(20,0,20,30);
+                lp2.setMargins(20,0,20,20);
+                Resources r = getResources();
+                int px = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 300, r.getDisplayMetrics());
+
+                nameEdit.setWidth(px);
+                blncEdit.setWidth(px);
+
+                layout.addView(nameEdit, lp1);
+                layout.addView(blncEdit, lp2);
+
+                dialog.setView(layout);
+                dialog.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String name = nameEdit.getText().toString() ;
+                        String balance = blncEdit.getText().toString() ;
+                        if (name.length() != 0 && blncEdit.length() != 0){
+                        updateRow(name, balance);}
+                    }
+                });
+                dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                dialog.show();
                 break;
         }
         return super.onContextItemSelected(item);
     }
+    public void updateRow(String accName, String opBlnc) {
+        boolean updatedData = mdatabaseHelper.updateRow(accName, opBlnc);
+        if (updatedData) {
+            Toast.makeText(this, "Successfully Data updated !", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Thora hor khappo", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private void populateListView() {
+        Cursor records = mdatabaseHelper.getData();
+        ArrayList<ModelAccounts> listRec = new ArrayList<ModelAccounts>();
+        while (records.moveToNext()) {
+            listRec.add(new ModelAccounts(records.getString(1), records.getString(3)));
+            AccountsAdapter customAdapter1 = new AccountsAdapter(getApplicationContext(), listRec) ;
+            listView.setAdapter(customAdapter1);
+            registerForContextMenu(listView);
+        }
+    }
 }
+
+
+
+
+
+
+
+
